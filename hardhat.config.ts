@@ -3,6 +3,7 @@ import 'dotenv/config'
 import {Networks} from './hardhat.networks'
 import {NamedAccounts} from './hardhat.accounts'
 import {HardhatUserConfig} from "hardhat/config";
+import 'hardhat-deploy'
 
 const config : HardhatUserConfig = {
   defaultNetwork: 'hardhat',

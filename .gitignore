@@ -11,3 +11,5 @@ artifacts
 
 .vscode
 .idea/
+
+.secret
