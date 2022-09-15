@@ -1,0 +1,17 @@
+{
+    "env": {
+      "browser": false,
+      "es2021": true,
+      "node": true
+    },
+      "extends": [
+        "eslint:recommended",
+        "plugin:prettier/recommended"
+      ],
+      "rules": {
+        "prettier/prettier": "warn"
+      },
+    "parserOptions": {
+      "ecmaVersion": "latest"
+    }
+  }

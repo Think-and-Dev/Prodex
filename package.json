@@ -1,0 +1,56 @@
+{
+  "name": "Prode",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Think-and-Dev/Prode.git",
+  "author": "Alejo Lovallo <alejoe.lovallo@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "echo 'Starting node for local testing....\n'; rm -rf deployments/localhost_31337; DISABLE_HARNESS=true hardhat node",
+    "console": "hardhat console --network",
+    "compile": "npx hardhat compile",
+    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true npx hardhat test",
+    "deploy": "npx hardhat deploy",
+    "size-contracts": "hardhat size-contracts",
+    "coverage": "yarn clean && HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true node --max-old-space-size=4096 ./node_modules/.bin/hardhat coverage --network coverage --temp build",
+    "docgen": "hardhat docgen"
+  },
+  "devDependencies": {
+    "@ethersproject/abi": "^5.4.7",
+    "@ethersproject/providers": "^5.4.7",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "@nomiclabs/hardhat-etherscan": "^3.0.0",
+    "@typechain/ethers-v5": "^10.1.0",
+    "@typechain/hardhat": "^6.1.2",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": ">=12.0.0",
+    "chai": "^4.2.0",
+    "deploy": "^1.0.3",
+    "eslint": "^8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "ethers": "^5.4.7",
+    "hardhat": "^2.11.2",
+    "hardhat-abi-exporter": "^2.10.0",
+    "hardhat-contract-sizer": "^2.6.1",
+    "hardhat-deploy": "^0.11.15",
+    "hardhat-docgen": "^1.3.0",
+    "hardhat-gas-reporter": "^1.0.8",
+    "prettier": "^2.7.1",
+    "solhint": "^3.3.7",
+    "solidity-coverage": "^0.8.0",
+    "ts-node": ">=8.0.0",
+    "typechain": "^8.1.0",
+    "typescript": ">=4.5.0"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.7.3"
+  }
+}
