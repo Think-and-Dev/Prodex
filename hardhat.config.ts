@@ -1,7 +1,11 @@
+/* eslint-disable node/no-unpublished-import */
+import '@nomicfoundation/hardhat-toolbox';
 import {Networks} from './hardhat.networks'
 import {NamedAccounts} from './hardhat.accounts'
 import {HardhatUserConfig} from "hardhat/config";
-import 'hardhat-deploy'
+import 'hardhat-deploy';
+import 'hardhat-abi-exporter';
+import 'hardhat-contract-sizer';
 
 const config : HardhatUserConfig = {
   defaultNetwork: 'hardhat',
@@ -38,6 +42,12 @@ const config : HardhatUserConfig = {
   },
   mocha: {
     timeout: 60000
+  },
+  abiExporter: {
+    path: './abis',
+    runOnCompile: true,
+    clear: true,
+    flat: true
   }
 }
 export default config
