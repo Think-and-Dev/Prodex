@@ -8,8 +8,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 describe("ProdeNFT", function () {
 
   const BASE_TOKEK_URI = "";
-  const NAME = "";
-  const SYMBOL = "";
+  const NAME = "ThinkAndDev";
+  const SYMBOL = "T&D";
   let prodeNFT: ProdeNFT;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;

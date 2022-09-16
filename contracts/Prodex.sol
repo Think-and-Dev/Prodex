@@ -281,4 +281,12 @@ contract Prodex is IProde, Ownable {
     IERC20(token).safeTransfer(NGO, ngoPrize);
     emit ClaimNGO(ngoPrize);
   }
+
+  function isWinner(address user) external view returns (bool) {
+    require(user != address(0), 'PRODEX: INVALID ADDRESS');
+    if (hitters[user] >= minWinnerPoints) {
+      return true;
+    }
+    return false;
+  }
 }
