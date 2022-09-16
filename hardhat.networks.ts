@@ -1,12 +1,13 @@
 import '@nomiclabs/hardhat-etherscan'
+
 import {NetworksUserConfig} from "hardhat/types";
 
 const fs = require('fs')
 let mnemonicLocal = ''
 try {
-    mnemonicLocal = fs.readFileSync('.secret').toString().trim()
+  mnemonicLocal = fs.readFileSync('.secret').toString().trim()
 } catch (error) {
-    console.warn('no mnemonic file')
+  console.warn('no mnemonic file')
 }
 
 export const Networks: NetworksUserConfig = {

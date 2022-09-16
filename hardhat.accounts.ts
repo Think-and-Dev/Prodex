@@ -1,5 +1,5 @@
 export const NamedAccounts = {
-    deployer: {
-        default: 0
-    }
+  deployer: {
+    default: 0
+  }
 }

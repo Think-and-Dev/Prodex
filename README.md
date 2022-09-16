@@ -14,7 +14,7 @@ yarn compile
 yarn test
 ```
 
-### Deploy 
+### Deploy
 
 ```
 yarn deploy
