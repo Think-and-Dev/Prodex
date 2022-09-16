@@ -37,5 +37,13 @@ export const Networks: NetworksUserConfig = {
         },
         gas: 2100000,
         gasPrice: 8000000000
+    },
+    matistestnet:{
+        chainId: 588,
+        url: 'https://stardust.metis.io/?owner=588',
+        gasPrice: 10000000000,
+        accounts: {
+            mnemonic: process.env.HDWALLET_MNEMONIC || mnemonicLocal
+        }
     }
 }
