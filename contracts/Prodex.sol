@@ -185,9 +185,9 @@ contract Prodex is IProde, Ownable {
 
   function collectWinnersBatch() external {}
 
-  function claim() {}
+  function claim() external{}
 
-  function claimONG() {}
+  function claimONG() external{}
 
-  function finalize() {}
+  function finalize() external{}
 }
