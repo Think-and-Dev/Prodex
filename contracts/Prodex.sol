@@ -112,7 +112,7 @@ contract Prodex is IProde, Ownable {
     require(_token != address(0), 'INVALID TOKEN ADDRESS');
     require(_ngo != address(0), 'INVALID NGO ADDRESS');
     require(_oracle != address(0), 'INVALID ORACLE ADDRESS');
-    require(minWinnerPoints > 0, 'INVALID MIN WINNER POINTS');
+    require(_minWinnerPoints > 0, 'INVALID MIN WINNER POINTS');
     maxEvents = _maxEvents;
     minWinnerPoints = _minWinnerPoints;
     token = _token;

@@ -3,12 +3,11 @@ import { DeployFunction } from "hardhat-deploy/dist/types";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   //@ts-ignore
-  const {deployments, getNamedAccounts, network, getChainId} = hre
-  const {deploy} = deployments
+  const { deployments, getNamedAccounts, network, getChainId } = hre
+  const { deploy } = deployments
   const chainId = parseInt(await getChainId(), 10)
-  const chainName ='BSC'
 
-  const {deployer} = await getNamedAccounts()
+  const { deployer } = await getNamedAccounts()
 
   console.log('deployer', deployer)
 
@@ -16,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Contracts - Deploy Script')
   console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 
-  console.log(`\n Deploying Lock...on ${chainName}-${chainId}`)
+  console.log(`\n Deploying Lock...on ${chainId}`)
 
   const unlockDate = 1694795386
   let constructorArguments = [unlockDate]
@@ -26,8 +25,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: constructorArguments,
     log: true
   })
+
+  console.log(`\n Lock deployed... ${deployResult.address}`)
 }
 
-func.tags = ['Oracle', '1.0.0']
-func.id = 'Oracle'
+func.tags = ['Lock', '1.0.0']
+func.id = 'Lock'
 export default func
