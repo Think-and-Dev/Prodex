@@ -10,6 +10,11 @@ mapping(uint256 =>SportEvent) eventos;
 Uint256 lastEventProcessd = 1 ; 
 Uint256 lastIndexAddressWinnerProcessed = 20; 
 mapping(uint256 =>SportEvent) eventos; 
+
+/**
+WE NEED IT TO CHECK THAT THE USER HAS NOT PLACED A BET ON THE MATCH BEFORE
+
+mapping(address => uint256[]) users;
 */
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -20,21 +25,32 @@ import "./interfaces/IProde.sol";
 contract Prodex is IProde, Ownable{
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
+    address public token;
+    address public immutable NGO;
+    uint256 public immutable NGODonationPercentage;
     uint256 public winners;
-    uint256 public poolSize;
+    uint256 public globalPoolSize;
     uint256 public immutable maxEvents;
     uint256 public minWinnerPoints;
 
     Counters.Counter private _eventIdCounter;
 
     mapping(address=>uint256) public hitters;
-    mapping(uint256 => Event) public events;
+    mapping(address=>uint256[]) public usersByEvent;
+    mapping(uint256=>Event) public events;
+
+
+    modifier validEvent(uint256 eventId) {
+        require(eventId <= maxEvents, "INVALID EVENT ID");
+        _;
+    }
     
     
-    event Initialized(uint256 maxEvents,uint256 minWinnerPoints);
+    event Initialized(address token,address NGO,uint256 NGODonationPercentage,uint256 maxEvents,uint256 minWinnerPoints);
     event MinWinnerPointsUpdated(uint256 oldMinPoints,uint256 newMinPoints);
     event EventCreated(uint256 eventId);
     event EventActive(uint256 eventId,uint256 blockInit, uint256 blockEnd);
+    event BetPlaced(uint256 eventId,address indexed who,BetOdd bet,uint256 amount);
 
     struct Event {
         bool active;
@@ -50,11 +66,16 @@ contract Prodex is IProde, Ownable{
         EventState state;
     }
 
-    constructor(uint256 _maxEvents,uint256 _minWinnerPoints){
+    constructor(address _token,address _ngo,uint256 _ngoDonationPercentage, uint256 _maxEvents,uint256 _minWinnerPoints,uint256 ){
+        require(_token != address(0),"INVALID TOKEN ADDRESS");
+        require(_ngo != address(0),"INVALID NGO ADDRESS");
         require(minWinnerPoints > 0, "INVALID MIN WINNER POINTS");
         maxEvents = _maxEvents;
         minWinnerPoints = _minWinnerPoints;
-        emit Initialized(maxEvents,minWinnerPoints);
+        token = _token;
+        NGO = _ngo;
+        NGODonationPercentage = _ngoDonationPercentage;
+        emit Initialized(token,NGO,NGODonationPercentage,maxEvents,minWinnerPoints);
     }
 
     /********** SETTERS ***********/
@@ -96,8 +117,7 @@ contract Prodex is IProde, Ownable{
         
     }
 
-    function startEvent(uint256 eventId) external {
-        require(eventId <= maxEvents, "PRODEX: INVALID EVENT ID");
+    function startEvent(uint256 eventId) external validEvent(eventId){
         require(!events[eventId].active,"PRODEX: EVENT ALREADY INITIATED");
         require(block.timestamp >= events[eventId].blockInit, "PRODEX: CANNOT INIT EVENT YET");
         events[eventId].active = true;
@@ -105,16 +125,31 @@ contract Prodex is IProde, Ownable{
         emit EventActive(eventId,events[eventId].blockInit,events[eventId].blockEnd);
     }
 
-    function stopEventBetWindow() external {
+    function stopEventBetWindow(uint256 eventId) validEvent(eventId) external {
 
     }
 
-    function finishEvent() external{
+    function finishEvent(uint256 eventId) validEvent(eventId) external{
         
     }
 
-    function bet(uint256 eventId) public {
-
+    function placeBet(uint256 eventId,BetOdd bet,uint256 amount) validEvent(eventId) public {
+        require(block.timestamp < events[eventId].blockInit - events[eventId].thresholdInit,"PRODEX: BET TIME EXPIRED");
+        require(usersByEvent[msg.sender][eventId] == 0,"PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT");
+        require(amount > 0, "PRODEX: AMOUNT TO BET MUST BE GREATER THAN ZERO");
+        events[eventId].poolSize += amount;
+        globalPoolSize += amount;
+        if(bet == BetOdd.TEAM_A){
+            events[eventId].betTeamA.push(msg.sender);
+        }else if(bet == BetOdd.TEAM_B){
+            events[eventId].betTeamB.push(msg.sender);
+        }else {
+            events[eventId].betDraw.push(msg.sender);
+        }
+        IERC20(token).safeTransferFrom(msg.sender,address(this),amount);
+        emit BetPlaced(eventId,msg.sender,bet,amount);
     }
+
+    
 
 }

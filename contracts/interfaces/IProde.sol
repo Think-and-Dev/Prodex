@@ -39,6 +39,12 @@ interface IProde {
         FINISHED
     }
 
+    enum BetOdd{
+        TEAM_A,
+        DRAW,
+        TEAM_B
+    }
+
 /*
     function changeStateEvent() external;
     function pokeOracle(uint256 eventId) external;
@@ -53,4 +59,6 @@ interface IProde {
     function stopEventBetWindow() external;
     function finishEvent() external;
 */
+
+
 }
