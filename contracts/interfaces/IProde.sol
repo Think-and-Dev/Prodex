@@ -29,23 +29,22 @@ pragma solidity ^0.8.9;
     }
 */
 
-
 interface IProde {
+  enum EventState {
+    CREATED,
+    ACTIVE,
+    ORACLE,
+    UPDATING,
+    FINISHED
+  }
 
-    enum EventState{
-        CREATED,
-        ACTIVE,
-        UPDATING,
-        FINISHED
-    }
+  enum BetOdd {
+    TEAM_A,
+    DRAW,
+    TEAM_B
+  }
 
-    enum BetOdd{
-        TEAM_A,
-        DRAW,
-        TEAM_B
-    }
-
-/*
+  /*
     function changeStateEvent() external;
     function pokeOracle(uint256 eventId) external;
     function bet(uint256 eventId, Bet) external;
@@ -59,6 +58,4 @@ interface IProde {
     function stopEventBetWindow() external;
     function finishEvent() external;
 */
-
-
 }
