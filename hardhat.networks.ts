@@ -1,5 +1,4 @@
 import '@nomiclabs/hardhat-etherscan'
-import 'dotenv/config'
 import {NetworksUserConfig} from "hardhat/types";
 
 const fs = require('fs')
