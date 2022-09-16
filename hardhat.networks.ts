@@ -25,7 +25,7 @@ export const Networks: NetworksUserConfig = {
     bsctestnet: {
         url: 'https://data-seed-prebsc-1-s3.binance.org:8545',
         chainId: 97,
-        gasPrice: 10000000000,
+        gasPrice: 100000000000,
         accounts: {
             mnemonic: process.env.HDWALLET_MNEMONIC || mnemonicLocal
         }

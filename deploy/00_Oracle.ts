@@ -9,11 +9,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const { deployer } = await getNamedAccounts()
 
-  console.log('deployer', deployer)
-
   console.log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
   console.log('Contracts - Deploy Script')
   console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+
+
 
   console.log(`\n Deploying Oracle...on ${chainId}`)
 
@@ -25,6 +25,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\n Oracle deployed... ${deployResult.address}`)
 }
 
-func.tags = ['Lock', '1.0.0']
-func.id = 'Lock'
+func.tags = ['Oracle', '1.0.0']
+func.id = 'Oracle'
 export default func

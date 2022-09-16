@@ -22,6 +22,7 @@ import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './interfaces/IProde.sol';
 import './interfaces/IOracle.sol';
+import 'hardhat/console.sol';
 
 contract Prodex is IProde, Ownable {
   using SafeERC20 for IERC20;
@@ -159,6 +160,7 @@ contract Prodex is IProde, Ownable {
 
   function addEvent(Event memory _event) external onlyOwner returns (uint256) {
     uint256 currentEventId = _eventIdCounter.current();
+    console.log(currentEventId);
     require(currentEventId <= maxEvents, 'PRODEX: CANNOT ADD MORE EVENTS');
     _eventIdCounter.increment();
     uint256 newEventId = _eventIdCounter.current();

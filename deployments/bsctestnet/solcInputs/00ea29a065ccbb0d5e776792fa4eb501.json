@@ -1,0 +1,38 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Oracle.sol": {
+      "content": "pragma solidity ^0.8.0;\nimport \"./RNGInterface.sol\";\n\ncontract Oracle {\n    RNGInterface public _randomNumbers;\n    constructor()  {\n        address  randomService = 0x1cDC2A4fF8d374D91a1161C142cc496FBF5547Ec;\n        _randomNumbers = RNGInterface(randomService);\n    }\n\n    function requestRandomNumber() external returns (uint32 requestId, uint32 lockBlock){\n        return  _randomNumbers.requestRandomNumber();\n    }\n\n    function getEventResult(uint256 eventId) external returns (uint8) {\n        //(uint32 requestId,)  = _randomNumbers.requestRandomNumber();\n       // uint256 randomNumber = _randomNumbers.randomNumber(requestId);\n       // uint256 result = randomNumber % 3;\n        return 2;\n    }\n\n}\n"
+    },
+    "contracts/RNGInterface.sol": {
+      "content": "// SPDX-License-Identifier: GPL-3.0\n\npragma solidity 0.8.6;\n\n/**\n * @title Random Number Generator Interface\n * @notice Provides an interface for requesting random numbers from 3rd-party RNG services (Chainlink VRF, Starkware VDF, etc..)\n */\ninterface RNGInterface {\n  /**\n   * @notice Emitted when a new request for a random number has been submitted\n   * @param requestId The indexed ID of the request used to get the results of the RNG service\n   * @param sender The indexed address of the sender of the request\n   */\n  event RandomNumberRequested(uint32 indexed requestId, address indexed sender);\n\n  /**\n   * @notice Emitted when an existing request for a random number has been completed\n   * @param requestId The indexed ID of the request used to get the results of the RNG service\n   * @param randomNumber The random number produced by the 3rd-party service\n   */\n  event RandomNumberCompleted(uint32 indexed requestId, uint256 randomNumber);\n\n  /**\n   * @notice Gets the last request id used by the RNG service\n   * @return requestId The last request id used in the last request\n   */\n  function getLastRequestId() external view returns (uint32 requestId);\n\n  /**\n   * @notice Gets the Fee for making a Request against an RNG service\n   * @return feeToken The address of the token that is used to pay fees\n   * @return requestFee The fee required to be paid to make a request\n   */\n  function getRequestFee() external view returns (address feeToken, uint256 requestFee);\n\n  /**\n   * @notice Sends a request for a random number to the 3rd-party service\n   * @dev Some services will complete the request immediately, others may have a time-delay\n   * @dev Some services require payment in the form of a token, such as $LINK for Chainlink VRF\n   * @return requestId The ID of the request used to get the results of the RNG service\n   * @return lockBlock The block number at which the RNG service will start generating time-delayed randomness.\n   * The calling contract should \"lock\" all activity until the result is available via the `requestId`\n   */\n  function requestRandomNumber() external returns (uint32 requestId, uint32 lockBlock);\n\n  /**\n   * @notice Checks if the request for randomness from the 3rd-party service has completed\n   * @dev For time-delayed requests, this function is used to check/confirm completion\n   * @param requestId The ID of the request used to get the results of the RNG service\n   * @return isCompleted True if the request has completed and a random number is available, false otherwise\n   */\n  function isRequestComplete(uint32 requestId) external view returns (bool isCompleted);\n\n  /**\n   * @notice Gets the random number produced by the 3rd-party service\n   * @param requestId The ID of the request used to get the results of the RNG service\n   * @return randomNum The random number\n   */\n  function randomNumber(uint32 requestId) external returns (uint256 randomNum);\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
