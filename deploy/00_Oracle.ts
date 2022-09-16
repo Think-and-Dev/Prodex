@@ -28,6 +28,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   })
 }
 
-func.tags = ['Lock', '1.0.0']
-func.id = 'Lock'
+func.tags = ['Oracle', '1.0.0']
+func.id = 'Oracle'
 export default func
