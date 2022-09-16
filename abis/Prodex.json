@@ -12,6 +12,11 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "_oracle",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "_ngoDonationPercentage",
         "type": "uint256"
@@ -72,6 +77,38 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "ngoPrize",
+        "type": "uint256"
+      }
+    ],
+    "name": "ClaimNGO",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "who",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "ClaimPrize",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "eventId",
         "type": "uint256"
       },
@@ -101,7 +138,39 @@
         "type": "uint256"
       }
     ],
+    "name": "EventBetsFinished",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "eventId",
+        "type": "uint256"
+      }
+    ],
     "name": "EventCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "eventId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "result",
+        "type": "uint8"
+      }
+    ],
+    "name": "EventOutcome",
     "type": "event"
   },
   {
@@ -117,6 +186,12 @@
         "indexed": false,
         "internalType": "address",
         "name": "NGO",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oracle",
         "type": "address"
       },
       {
@@ -180,6 +255,56 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "ngoPrize",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "winnerPrize",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalAmountToShare",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "winners",
+        "type": "uint256"
+      }
+    ],
+    "name": "PrizesSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "eventId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOfWinners",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpdateWinnersEvent",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "NGO",
     "outputs": [
@@ -213,6 +338,11 @@
             "internalType": "bool",
             "name": "active",
             "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "eventOutcome",
+            "type": "uint8"
           },
           {
             "internalType": "string",
@@ -291,6 +421,11 @@
             "type": "bool"
           },
           {
+            "internalType": "uint8",
+            "name": "eventOutcome",
+            "type": "uint8"
+          },
+          {
             "internalType": "string",
             "name": "name",
             "type": "string"
@@ -352,6 +487,26 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "claimONG",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "claimPrize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -365,6 +520,11 @@
         "internalType": "bool",
         "name": "active",
         "type": "bool"
+      },
+      {
+        "internalType": "uint8",
+        "name": "eventOutcome",
+        "type": "uint8"
       },
       {
         "internalType": "string",
@@ -413,9 +573,28 @@
         "type": "uint256"
       }
     ],
-    "name": "finishEvent",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "getEventWinners",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNGOCurrentPoolPrize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -478,6 +657,32 @@
   },
   {
     "inputs": [],
+    "name": "ngoPrize",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "oracle",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -513,6 +718,19 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "eventId",
+        "type": "uint256"
+      }
+    ],
+    "name": "pokeOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
@@ -528,6 +746,13 @@
       }
     ],
     "name": "setMinWinnerPoints",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "setPrizes",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -587,6 +812,19 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "eventId",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateResults",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "",
         "type": "address"
@@ -598,6 +836,19 @@
       }
     ],
     "name": "usersByEvent",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "winnerPrize",
     "outputs": [
       {
         "internalType": "uint256",

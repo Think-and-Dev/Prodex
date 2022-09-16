@@ -30,12 +30,15 @@ contract Prodex is IProde, Ownable {
   address public oracle;
   address public immutable NGO;
   uint256 public immutable NGODonationPercentage;
-  uint256 public winners;
   uint256 public globalPoolSize;
   uint256 public immutable maxEvents;
   uint256 public minWinnerPoints;
+  uint256 public winners;
+  uint256 public winnerPrize;
+  uint256 public ngoPrize;
 
   Counters.Counter private _eventIdCounter;
+  Counters.Counter private _eventIdProcessedCounter;
 
   mapping(address => uint256) public hitters;
   mapping(address => uint256[]) public usersByEvent;
@@ -43,6 +46,19 @@ contract Prodex is IProde, Ownable {
 
   modifier validEvent(uint256 eventId) {
     require(eventId <= maxEvents && events[eventId].active, 'INVALID EVENT ID OR NOT ACTIVE');
+    _;
+  }
+
+  modifier onlyOwnerOrNGO() {
+    require(msg.sender == NGO || msg.sender == this.owner(), 'PRODEX: NOT NGO OR CONTRACT OWNER');
+    _;
+  }
+
+  modifier ableToClaim() {
+    require(
+      _eventIdProcessedCounter.current() == maxEvents,
+      'PRODEX: ALL EVENTS MUST BE PROCESSED TO CLAIM PRIZE'
+    );
     _;
   }
 
@@ -61,6 +77,14 @@ contract Prodex is IProde, Ownable {
   event EventBetsFinished(uint256 eventId);
   event EventOutcome(uint256 eventId, uint8 result);
   event UpdateWinnersEvent(uint256 eventId, uint256 amountOfWinners);
+  event ClaimPrize(address indexed who, address indexed to);
+  event PrizesSet(
+    uint256 ngoPrize,
+    uint256 winnerPrize,
+    uint256 totalAmountToShare,
+    uint256 winners
+  );
+  event ClaimNGO(uint256 ngoPrize);
 
   struct Event {
     bool active;
@@ -109,8 +133,8 @@ contract Prodex is IProde, Ownable {
 
   /********** GETTERS ***********/
 
-  function getNGOCurrentPool() external view returns (uint256) {
-    return globalPoolSize * NGODonationPercentage;
+  function getNGOCurrentPoolPrize() external view returns (uint256) {
+    return globalPoolSize * (NGODonationPercentage / 100);
   }
 
   /********** INTERFACE ***********/
@@ -135,7 +159,7 @@ contract Prodex is IProde, Ownable {
 
   function addEvent(Event memory _event) external onlyOwner returns (uint256) {
     uint256 currentEventId = _eventIdCounter.current();
-    require(currentEventId < maxEvents, 'PRODEX: CANNOT ADD MORE EVENTS');
+    require(currentEventId <= maxEvents, 'PRODEX: CANNOT ADD MORE EVENTS');
     _eventIdCounter.increment();
     uint256 newEventId = _eventIdCounter.current();
     validateEventCreation(_event);
@@ -144,6 +168,7 @@ contract Prodex is IProde, Ownable {
     _event.state = EventState.CREATED;
     events[newEventId] = _event;
     emit EventCreated(newEventId);
+    return newEventId;
   }
 
   /**TODO SATURDAY */
@@ -180,7 +205,7 @@ contract Prodex is IProde, Ownable {
     emit EventOutcome(eventId, eventResult);
   }
 
-  function getEventWinners(uint256 eventId) internal view returns (address[] memory) {
+  function getEventWinners(uint256 eventId) public view returns (address[] memory) {
     uint256 result = events[eventId].eventOutcome;
     if (result == 0) {
       return events[eventId].betTeamA;
@@ -196,13 +221,15 @@ contract Prodex is IProde, Ownable {
     address[] memory eventWinners = getEventWinners(eventId);
     for (uint256 i = 0; i < eventWinners.length; i++) {
       hitters[eventWinners[i]] += 1;
+      if (hitters[eventWinners[i]] >= minWinnerPoints) {
+        winners++;
+      }
     }
     events[eventId].state = EventState.FINISHED;
     events[eventId].active = false;
+    _eventIdProcessedCounter.increment();
     emit UpdateWinnersEvent(eventId, eventWinners.length);
   }
-
-  function finishEvent(uint256 eventId) external validEvent(eventId) {}
 
   function placeBet(
     uint256 eventId,
@@ -230,9 +257,28 @@ contract Prodex is IProde, Ownable {
     emit BetPlaced(eventId, msg.sender, bet, amount);
   }
 
-  function claim() external {}
+  function setPrizes() external {
+    require(
+      _eventIdProcessedCounter.current() == maxEvents,
+      'PRODEX: ALL EVENTS MUST BE PROCESSED TO SET PRIZES'
+    );
+    require(winners > 0, 'PRODEX: NO WINNERS');
+    uint256 usersTotalAmountToShare = globalPoolSize * ((100 - NGODonationPercentage) / 100);
+    winnerPrize = usersTotalAmountToShare / winners;
+    ngoPrize = globalPoolSize - usersTotalAmountToShare;
+    emit PrizesSet(ngoPrize, winnerPrize, usersTotalAmountToShare, winners);
+  }
 
-  function claimONG() external {}
+  function claimPrize(address to) external ableToClaim {
+    require(winnerPrize > 0, 'PRODEX: WINERPRIZE NOT SET');
+    require(hitters[msg.sender] >= minWinnerPoints, 'PRODEX: USER NOT ELEGIBLE TO CLAIM PRIZE');
+    IERC20(token).safeTransfer(to, winnerPrize);
+    hitters[msg.sender] = 0;
+    emit ClaimPrize(msg.sender, to);
+  }
 
-  function finalize() external {}
+  function claimONG() external onlyOwnerOrNGO ableToClaim {
+    IERC20(token).safeTransfer(NGO, ngoPrize);
+    emit ClaimNGO(ngoPrize);
+  }
 }
