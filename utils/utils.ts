@@ -24,7 +24,7 @@ function green() {
   }
 }
 
-function displayResult(name, result) {
+function displayResult(name: string, result) {
   if (!result.newlyDeployed) {
     yellow(`Re-used existing ${name} at ${result.address}`)
   } else {
