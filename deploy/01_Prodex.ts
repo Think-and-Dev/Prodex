@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deploy } = deployments
     const chainId = parseInt(await getChainId(), 10)
     const { deployer } = await getNamedAccounts()
-    const oracle = await deployments.get('Lock');
+    const oracle = await deployments.get('Oracle');
 
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy("TYD","TYD",5000);
@@ -29,6 +29,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         MAX_EVENTS,
         MIN_WINNER_POINTS
     ]
+
+    console.log('constructorArguments', constructorArguments)
+
     const deployResult = await deploy('Prodex', {
         from: deployer,
         args: constructorArguments,
@@ -38,7 +41,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(`\n Prodex deployed... ${deployResult.address}`)
 }
 
-func.dependencies = ["Lock"]
 func.tags = ['Prodex', '1.0.0']
 func.id = 'Prodex'
 export default func

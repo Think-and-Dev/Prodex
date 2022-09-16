@@ -3,8 +3,9 @@ import "./RNGInterface.sol";
 
 contract Oracle {
     RNGInterface public _randomNumbers;
-    constructor(address random)  {
-        _randomNumbers = RNGInterface(random);
+    constructor()  {
+        address  randomService = 0x1cDC2A4fF8d374D91a1161C142cc496FBF5547Ec;
+        _randomNumbers = RNGInterface(randomService);
     }
 
     function requestRandomNumber() external returns (uint32 requestId, uint32 lockBlock){
