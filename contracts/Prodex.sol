@@ -99,9 +99,13 @@ contract Prodex is IProde, Ownable {
 
   /********** GETTERS ***********/
 
+  function getNGOCurrentPool() external view returns (uint256) {
+    return globalPoolSize * NGODonationPercentage;
+  }
+
   /********** INTERFACE ***********/
 
-  function validateEventCreation(Event memory _event) internal {
+  function validateEventCreation(Event memory _event) internal view {
     require(
       _event.blockInit > block.timestamp,
       'PRODEX: INIT BLOCK MUST BE GREATER THAN CURRENT BLOCK'
@@ -143,9 +147,13 @@ contract Prodex is IProde, Ownable {
     emit EventActive(eventId, events[eventId].blockInit, events[eventId].blockEnd);
   }
 
-  function stopEventBetWindow(uint256 eventId) external validEvent(eventId) {}
+  function stopEventBetWindow(uint256 eventId) external validEvent(eventId) {
+    require(block.timestamp >= events[eventId].blockEnd + events[eventId].thresholdEnd);
+  }
 
   function finishEvent(uint256 eventId) external validEvent(eventId) {}
+
+  function pokeOracle() external {}
 
   function placeBet(
     uint256 eventId,
@@ -174,4 +182,12 @@ contract Prodex is IProde, Ownable {
     IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
     emit BetPlaced(eventId, msg.sender, bet, amount);
   }
+
+  function collectWinnersBatch() external {}
+
+  function claim() {}
+
+  function claimONG() {}
+
+  function finalize() {}
 }
