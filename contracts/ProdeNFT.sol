@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "hardhat/console.sol";
+import "./Prodex.sol";
 
 contract ProdeNFT is ERC721URIStorage, Ownable {
 
@@ -15,7 +15,7 @@ contract ProdeNFT is ERC721URIStorage, Ownable {
     Counters.Counter private tokenIdCounter;
 
     string public contractUri;
-    string public bedContractAddress;
+    address public betContractAddress;
 
     event Initialized(string tokenUri, string name, string symbol);
     event ContractURIUpdated(string indexed contractUri);
@@ -26,10 +26,10 @@ contract ProdeNFT is ERC721URIStorage, Ownable {
         string memory _baseTokenUri,
         string memory _name,
         string memory _symbol,
-        string memory _bedContractAddress
+        address _betContractAddress
     ) ERC721(_name, _symbol) {
         baseTokenUri = _baseTokenUri;
-        bedContractAddress = _bedContractAddress;
+        betContractAddress = _betContractAddress;
         emit Initialized(_baseTokenUri, _name, _symbol);
     }
 
@@ -42,11 +42,9 @@ contract ProdeNFT is ERC721URIStorage, Ownable {
     }
 
     function safeMint(uint256 _eventId) external returns (uint256) {
-
-        console.log(_eventId);
-        console.log(msg.sender);
         
         require(mints[_eventId][msg.sender] == false, "Ya obtuviste tu NFT para este evento");
+        require(checkIfIsWinner(msg.sender), "No ganaste el evento");
 
         tokenIdCounter.increment();
         uint256 newTokenId = tokenIdCounter.current();
@@ -67,5 +65,10 @@ contract ProdeNFT is ERC721URIStorage, Ownable {
     function setContractURI(string memory uri) public {
         contractUri = uri;
         emit ContractURIUpdated(contractUri);
+    }
+
+    function checkIfIsWinner(address minterAddress) private returns(bool){
+        Prodex prodexContract = Prodex(betContractAddress);
+        return prodexContract.isWinner(minterAddress);
     }
 }

@@ -17,9 +17,9 @@
         "type": "string"
       },
       {
-        "internalType": "string",
-        "name": "_bedContractAddress",
-        "type": "string"
+        "internalType": "address",
+        "name": "_betContractAddress",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -209,12 +209,12 @@
   },
   {
     "inputs": [],
-    "name": "bedContractAddress",
+    "name": "betContractAddress",
     "outputs": [
       {
-        "internalType": "string",
+        "internalType": "address",
         "name": "",
-        "type": "string"
+        "type": "address"
       }
     ],
     "stateMutability": "view",

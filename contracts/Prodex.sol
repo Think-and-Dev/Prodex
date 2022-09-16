@@ -190,4 +190,6 @@ contract Prodex is IProde, Ownable {
   function claimONG() external{}
 
   function finalize() external{}
+
+  function isWinner(address minterAddress) external returns (bool){}
 }
