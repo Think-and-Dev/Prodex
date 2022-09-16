@@ -1,15 +1,10 @@
-import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { ProdeNFT } from "../typechain-types/contracts/ProdeNFT";
+import {expect} from 'chai'
+import {ethers} from 'hardhat'
+import { Prodex } from "../typechain-types/contracts/Prodex";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("ProdeNFT", function () {
 
-  const BASE_TOKEK_URI = "";
-  const NAME = "ThinkAndDev";
-  const SYMBOL = "T&D";
   let prodeNFT: ProdeNFT;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
@@ -19,6 +14,10 @@ describe("ProdeNFT", function () {
     prodeNFT = await ProdeNFT.deploy(BASE_TOKEK_URI, NAME, SYMBOL, "");
     [user1, user2] = await ethers.getSigners();
   });
+
+  before(async()=>{
+
+  })
 
 
   describe("Mint", function () {
