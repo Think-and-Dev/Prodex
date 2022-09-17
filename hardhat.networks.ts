@@ -45,7 +45,7 @@ export const Networks: NetworksUserConfig = {
         gas: 2100000,
         gasPrice: 8000000000
     },
-    matistestnet:{
+    metistestnet:{
         chainId: 588,
         url: 'https://stardust.metis.io/?owner=588',
         gasPrice: 10000000000,
