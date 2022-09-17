@@ -137,13 +137,19 @@ contract Prodex is IProde, Ownable {
         emit EventBetsFinished(eventId);
     }
 
+    function requestOracle(uint256 eventId) external validEvent(eventId) {
+        IOracle(oracle).requestRandomNumber(eventId);
+        emit RequestedRandomId(eventId);
+    }
+
     function pokeOracle(uint256 eventId) external validEvent(eventId) {
         require(events[eventId].state == EventState.ORACLE, "PRODEX: EVENT STATE DOES NOT ALLOW TO POKE ORACLE");
         require(
             block.number > events[eventId].blockEnd + events[eventId].thresholdEnd,
             "PRODEX: IT IS NOT TIME TO POKE ORACLE YET"
         );
-        uint8 eventResult = IOracle(oracle).getEventResult(eventId);
+
+    uint8 eventResult = IOracle(oracle).getEventResult(eventId);
 
         events[eventId].eventOutcome = eventResult;
         events[eventId].state = EventState.UPDATING;

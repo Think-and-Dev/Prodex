@@ -1,13 +1,13 @@
 /* eslint-disable node/no-unpublished-import */
-import '@nomicfoundation/hardhat-toolbox';
+import '@nomicfoundation/hardhat-toolbox'
 import {Networks} from './hardhat.networks'
 import {NamedAccounts} from './hardhat.accounts'
 import {HardhatUserConfig} from 'hardhat/config'
 import 'hardhat-deploy'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-etherscan'
-import 'hardhat-abi-exporter';
-import 'hardhat-contract-sizer';
+import 'hardhat-abi-exporter'
+import 'hardhat-contract-sizer'
 
 const config: HardhatUserConfig = {
   networks: Networks,
@@ -55,7 +55,7 @@ const config: HardhatUserConfig = {
   },
   abiExporter: {
     path: './abis',
-    runOnCompile: true,
+    runOnCompile: false,
     clear: true,
     flat: true
   }

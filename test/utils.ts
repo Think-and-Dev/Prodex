@@ -40,7 +40,8 @@ export enum EVENTS {
   ClaimPrize = 'ClaimPrize',
   PrizesSet = 'PrizesSet',
   ClaimNGO = 'ClaimNGO',
-  PrizeMinted = 'PrizeMinted'
+  PrizeMinted = 'PrizeMinted',
+  RequestedRandomId = 'RequestedRandomId'
 }
 
 export enum EventState {
