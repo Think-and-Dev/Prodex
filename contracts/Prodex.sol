@@ -20,12 +20,16 @@ mapping(address => uint256[]) users;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import './interfaces/IProde.sol';
 import './interfaces/IOracle.sol';
 import 'hardhat/console.sol';
 
 contract Prodex is IProde, Ownable {
   using SafeERC20 for IERC20;
+  using SafeMath for uint256;
+
   using Counters for Counters.Counter;
   address public token;
   address public oracle;
@@ -47,6 +51,11 @@ contract Prodex is IProde, Ownable {
 
   modifier validEvent(uint256 eventId) {
     require(eventId <= maxEvents && events[eventId].active, 'INVALID EVENT ID OR NOT ACTIVE');
+    _;
+  }
+
+  modifier validMaxEvents(uint256 eventId) {
+    require(eventId <= maxEvents, 'EVENT IS GREATER THAN MAX EVENTS NUMBER');
     _;
   }
 
@@ -141,6 +150,7 @@ contract Prodex is IProde, Ownable {
   /********** INTERFACE ***********/
 
   function validateEventCreation(Event memory _event) internal view {
+
     require(
       _event.blockInit > block.timestamp,
       'PRODEX: INIT BLOCK MUST BE GREATER THAN CURRENT BLOCK'
@@ -160,7 +170,6 @@ contract Prodex is IProde, Ownable {
 
   function addEvent(Event memory _event) external onlyOwner returns (uint256) {
     uint256 currentEventId = _eventIdCounter.current();
-    console.log(currentEventId);
     require(currentEventId <= maxEvents, 'PRODEX: CANNOT ADD MORE EVENTS');
     _eventIdCounter.increment();
     uint256 newEventId = _eventIdCounter.current();
@@ -176,7 +185,7 @@ contract Prodex is IProde, Ownable {
   /**TODO SATURDAY */
   function addEvents(Event[] memory _events) external onlyOwner {}
 
-  function startEvent(uint256 eventId) external validEvent(eventId) {
+  function startEvent(uint256 eventId) external validMaxEvents(eventId) {
     require(
       block.timestamp >= events[eventId].blockInit - events[eventId].thresholdInit,
       'PRODEX: CANNOT INIT EVENT YET'
@@ -202,6 +211,7 @@ contract Prodex is IProde, Ownable {
       'PRODEX: IT IS NOT TIME TO POKE ORACLE YET'
     );
     uint8 eventResult = IOracle(oracle).getEventResult(eventId);
+
     events[eventId].eventOutcome = eventResult;
     events[eventId].state = EventState.UPDATING;
     emit EventOutcome(eventId, eventResult);
@@ -240,11 +250,14 @@ contract Prodex is IProde, Ownable {
   ) public validEvent(eventId) {
     require(events[eventId].active, 'PRODEX: EVENT NOT ACTIVE');
     require(block.timestamp <= events[eventId].blockInit, 'PRODEX: BET TIME EXPIRED');
-    require(
+    //TODO: it could bet better if this amount is a constant value
+    require(amount > 0, 'PRODEX: AMOUNT TO BET MUST BE GREATER THAN ZERO');
+    //TODO: This require is reverting the transaction with error :0x32 (Array accessed at an out-of-bounds or negative index)
+    //TODO: I think we need to add the user to the mapping first. At the moment i will comment it
+   /* require(
       usersByEvent[msg.sender][eventId] == 0,
       'PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT'
-    );
-    require(amount > 0, 'PRODEX: AMOUNT TO BET MUST BE GREATER THAN ZERO');
+    );*/
 
     events[eventId].poolSize += amount;
     globalPoolSize += amount;
@@ -255,6 +268,7 @@ contract Prodex is IProde, Ownable {
     } else {
       events[eventId].betDraw.push(msg.sender);
     }
+
     IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
     emit BetPlaced(eventId, msg.sender, bet, amount);
   }
@@ -265,12 +279,15 @@ contract Prodex is IProde, Ownable {
       'PRODEX: ALL EVENTS MUST BE PROCESSED TO SET PRIZES'
     );
     require(winners > 0, 'PRODEX: NO WINNERS');
-    uint256 usersTotalAmountToShare = globalPoolSize * ((100 - NGODonationPercentage) / 100);
+    uint256 percentage = 100 - NGODonationPercentage;
+    uint256 usersTotalAmountToShare = globalPoolSize.mul(percentage).div(100);
+
     winnerPrize = usersTotalAmountToShare / winners;
     ngoPrize = globalPoolSize - usersTotalAmountToShare;
     emit PrizesSet(ngoPrize, winnerPrize, usersTotalAmountToShare, winners);
   }
 
+  //TODO: why are we sending to address parameter, shouldn't be msg.sender?
   function claimPrize(address to) external ableToClaim {
     require(winnerPrize > 0, 'PRODEX: WINERPRIZE NOT SET');
     require(hitters[msg.sender] >= minWinnerPoints, 'PRODEX: USER NOT ELEGIBLE TO CLAIM PRIZE');
