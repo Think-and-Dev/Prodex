@@ -11,7 +11,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy("TYD","TYD",5000);
-
+    await mockToken.deployed()
+    
     const MAX_EVENTS = 100;
     const ONG_ADDRESS = "0x58eFdc4236465a87c996eb12751151a6084181f9";
     const MIN_WINNER_POINTS = 10;
