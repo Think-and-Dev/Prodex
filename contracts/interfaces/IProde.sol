@@ -50,6 +50,8 @@ interface IProde {
     event ClaimPrize(address indexed who, address indexed to);
     event PrizesSet(uint256 ngoPrize, uint256 winnerPrize, uint256 totalAmountToShare, uint256 winners);
     event ClaimNGO(uint256 ngoPrize);
+    event RequestedRandomId(uint256 eventId);
+
 
     /********** SETTERS ***********/
     function setMinWinnerPoints(uint256 _newMinWinnerPoints) external;

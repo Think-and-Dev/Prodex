@@ -1,22 +1,37 @@
 pragma solidity ^0.8.0;
 import "./interfaces/IRNG.sol";
+import "hardhat/console.sol";
 
 contract Oracle {
     IRNG public _randomNumbers;
+    event RequestedRandomId(uint256 eventId, uint32 requestedId);
+    mapping(uint256 => uint32) public requested;
 
-    constructor() {
-        address randomService = 0x1cDC2A4fF8d374D91a1161C142cc496FBF5547Ec;
-        _randomNumbers = IRNG(randomService);
+    constructor(address randomServiceAddress) {
+        _randomNumbers = IRNG(randomServiceAddress);
     }
 
-    function requestRandomNumber() external returns (uint32 requestId, uint32 lockBlock) {
-        return _randomNumbers.requestRandomNumber();
+    function requestRandomNumber(uint256 eventId) external {
+        (uint32 requestedId , )= _randomNumbers.requestRandomNumber();
+        requested[eventId] = requestedId;
+        emit RequestedRandomId(eventId, requestedId);
     }
 
-    function getEventResult(uint256 eventId) external returns (uint8) {
-        //(uint32 requestId,)  = _randomNumbers.requestRandomNumber();
-        // uint256 randomNumber = _randomNumbers.randomNumber(requestId);
-        // uint256 result = randomNumber % 3;
+    function isRequestComplete(uint32 requestId) external view  returns (bool isCompleted) {
+        return _randomNumbers.isRequestComplete(requestId);
+    }
+
+    function getEventResult(uint256 eventId) external returns (uint256) {
+        uint32  requestedId = requested[eventId];
+        //require(requestedId > 0 , "SHOULD REQUEST A RANDOM ID FIRST");
+        //require(_randomNumbers.isRequestComplete(requestedId), "NOT GENERATED YET");
+        //uint256 result =  _randomNumbers.randomNumber(requestedId);
         return 2;
+    }
+
+    function getResult(uint256 eventId) external view returns (uint256) {
+        uint32  requestedId = requested[eventId];
+        uint256 random  =_randomNumbers.getRandomNumber(requestedId);
+        return random % 3;
     }
 }

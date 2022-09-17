@@ -7,6 +7,7 @@ pragma solidity 0.8.6;
  * @notice Provides an interface for requesting random numbers from 3rd-party RNG services (Chainlink VRF, Starkware VDF, etc..)
  */
 interface IRNG {
+
     /**
      * @notice Emitted when a new request for a random number has been submitted
      * @param requestId The indexed ID of the request used to get the results of the RNG service
@@ -58,4 +59,6 @@ interface IRNG {
      * @return randomNum The random number
      */
     function randomNumber(uint32 requestId) external returns (uint256 randomNum);
+
+    function getRandomNumber(uint32 requestId) external view returns (uint256 randomNumber);
 }

@@ -18,6 +18,11 @@ contract RNGBlockhash is IRNG, Ownable {
 
     event RandomNumberGetted(uint256 number);
 
+    function getRandomNumber(uint32 requestId) external view virtual override returns (uint256 random) {
+       // uint256 r = randomNumbers(requestId);
+        return 998798798;
+    }
+
     /// @notice Gets the last request id used by the RNG service
     /// @return requestId The last request id used in the last request
     function getLastRequestId() external view override returns (uint32 requestId) {

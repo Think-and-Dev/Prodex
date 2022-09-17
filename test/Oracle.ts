@@ -1,15 +1,15 @@
 import chai, {expect} from 'chai'
 import hre, {ethers} from 'hardhat'
 
-import { RNGBlockhash, Oracle} from '../typechain'
+import {RNGBlockhash, Oracle} from '../typechain'
 import {chaiEthers} from 'chai-ethers'
-import {  SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
+import {AdvanceTimeForwardAndMine, EVENTS} from './utils'
 
 chai.use(chaiEthers)
 
 async function advanceBlock() {
-  return ethers.provider.send('evm_mine', []);
+  return ethers.provider.send('evm_mine', [])
 }
 
 describe('Random Number Generator', () => {
@@ -26,17 +26,15 @@ describe('Random Number Generator', () => {
 
     oracle = await (await ethers.getContractFactory('Oracle')).deploy(rNGBlockhash.address)
     await oracle.deployed()
-
   })
 
   it('random number generator', async () => {
-    const request = await rNGBlockhash.requestRandomNumber()
-    console.log( request.value)
+    await expect(oracle.requestRandomNumber(50)).to.emit(oracle, EVENTS.RequestedRandomId)
+    //avance block
+    await AdvanceTimeForwardAndMine(6000)
+    await oracle.getEventResult(50)
 
-    await advanceBlock()
-
-    const request2 = await rNGBlockhash.requestRandomNumber()
-    console.log( request2.value)
-    //const num = await rNGBlockhash.randomNumber(request.value)
+    /* const event = await oracle.getResult(50)
+    console.log('request', event)*/
   })
 })

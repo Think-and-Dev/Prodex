@@ -1,6 +1,6 @@
 import chai, {expect} from 'chai'
 import hre, {ethers} from 'hardhat'
-import {Prodex, MockToken, Oracle} from '../typechain-types'
+import {Prodex, MockToken, Oracle, RNGBlockhash} from '../typechain-types'
 import {chaiEthers} from 'chai-ethers'
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
 import {AdvanceTimeForwardAndMine, BetOdd, createDefaultEvent, EVENTS, MINUTES} from './utils'
@@ -14,6 +14,7 @@ describe('Prodex', () => {
   let mockERC20: MockToken
   let sportOracle: Oracle
   let ngo: SignerWithAddress
+  let random: RNGBlockhash
 
   beforeEach(async () => {
     await hre.network.provider.send('hardhat_reset')
@@ -23,7 +24,10 @@ describe('Prodex', () => {
     ).deploy('Theter', 'USDT', ethers.utils.parseEther('10000'))
     await mockERC20.deployed()
 
-    sportOracle = await (await ethers.getContractFactory('Oracle')).deploy()
+    random = await (await ethers.getContractFactory('RNGBlockhash')).deploy()
+    await random.deployed()
+
+    sportOracle = await (await ethers.getContractFactory('Oracle')).deploy(random.address)
     await sportOracle.deployed()
 
     const addresses = await ethers.getSigners()
@@ -37,15 +41,17 @@ describe('Prodex', () => {
 
     prodex = await (
       await ethers.getContractFactory('Prodex')
-    ).deploy(mockERC20.address, ngo.address, sportOracle.address, ngoDonationPercentage, maxEvents, minWinnerPoints,betAmount)
+    ).deploy(
+      mockERC20.address,
+      ngo.address,
+      sportOracle.address,
+      ngoDonationPercentage,
+      maxEvents,
+      minWinnerPoints,
+      betAmount
+    )
 
     await prodex.deployed()
-  })
-
-  it('setMinWinnerPoints', async () => {
-    await prodex.setMinWinnerPoints(500)
-    const result = await prodex.minWinnerPoints()
-    expect(result).to.be.equal(500)
   })
 
   it('addEvent', async () => {
@@ -83,7 +89,7 @@ describe('Prodex', () => {
     await prodex.placeBet(expectedEventId, 1)
   })
 
-  it('Should not allow to place two bets for the same event',async()=>{
+  it('Should not allow to place two bets for the same event', async () => {
     const startTime = getCurrentTimestamp() + 5 * MINUTES
     const endTime = startTime + 45 * MINUTES
     //TODO: remember in the front end to approve
@@ -97,7 +103,9 @@ describe('Prodex', () => {
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
     await prodex.placeBet(expectedEventId, 1)
-    await expect(prodex.placeBet(expectedEventId, 1)).to.revertedWith("PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT");
+    await expect(prodex.placeBet(expectedEventId, 1)).to.revertedWith(
+      'PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT'
+    )
   })
 
   it('stopEventBetWindow', async () => {
@@ -153,6 +161,10 @@ describe('Prodex', () => {
 
     await AdvanceTimeForwardAndMine(10 * MINUTES)
 
+    await expect(prodex.requestOracle(expectedEventId)).to.emit(prodex, EVENTS.RequestedRandomId)
+
+    await AdvanceTimeForwardAndMine(10 * MINUTES)
+
     await expect(prodex.pokeOracle(expectedEventId)).to.emit(prodex, EVENTS.EventOutcome).withArgs(expectedEventId, 2)
   })
 
@@ -171,7 +183,7 @@ describe('Prodex', () => {
 
     const betType = BetOdd.DRAW
 
-    await expect(prodex.placeBet(expectedEventId, betType,))
+    await expect(prodex.placeBet(expectedEventId, betType))
       .to.emit(prodex, EVENTS.BetPlaced)
       .withArgs(expectedEventId, deployer.address, betType)
 
@@ -180,6 +192,10 @@ describe('Prodex', () => {
     await expect(prodex.stopEventBetWindow(expectedEventId))
       .to.emit(prodex, EVENTS.EventBetsFinished)
       .withArgs(expectedEventId)
+
+    await AdvanceTimeForwardAndMine(10 * MINUTES)
+
+    await expect(prodex.requestOracle(expectedEventId)).to.emit(prodex, EVENTS.RequestedRandomId)
 
     await AdvanceTimeForwardAndMine(10 * MINUTES)
 
@@ -217,6 +233,10 @@ describe('Prodex', () => {
 
     await AdvanceTimeForwardAndMine(10 * MINUTES)
 
+    await expect(prodex.requestOracle(expectedEventId)).to.emit(prodex, EVENTS.RequestedRandomId)
+
+    await AdvanceTimeForwardAndMine(10 * MINUTES)
+
     await expect(prodex.pokeOracle(expectedEventId)).to.emit(prodex, EVENTS.EventOutcome).withArgs(expectedEventId, 2)
 
     await expect(prodex.updateResults(expectedEventId))
@@ -250,6 +270,10 @@ describe('Prodex', () => {
     await expect(prodex.stopEventBetWindow(expectedEventId))
       .to.emit(prodex, EVENTS.EventBetsFinished)
       .withArgs(expectedEventId)
+
+    await AdvanceTimeForwardAndMine(10 * MINUTES)
+
+    await expect(prodex.requestOracle(expectedEventId)).to.emit(prodex, EVENTS.RequestedRandomId)
 
     await AdvanceTimeForwardAndMine(10 * MINUTES)
 
@@ -290,6 +314,10 @@ describe('Prodex', () => {
     await expect(prodex.stopEventBetWindow(expectedEventId))
       .to.emit(prodex, EVENTS.EventBetsFinished)
       .withArgs(expectedEventId)
+
+    await AdvanceTimeForwardAndMine(10 * MINUTES)
+
+    await expect(prodex.requestOracle(expectedEventId)).to.emit(prodex, EVENTS.RequestedRandomId)
 
     await AdvanceTimeForwardAndMine(10 * MINUTES)
 
