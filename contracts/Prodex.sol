@@ -96,8 +96,8 @@ contract Prodex is IProde, Ownable {
     /********** INTERFACE ***********/
 
     function validateEventCreation(Event memory _event) internal view {
-        require(_event.blockInit > block.timestamp, "PRODEX: INIT BLOCK MUST BE GREATER THAN CURRENT BLOCK");
-        require(_event.blockEnd > block.timestamp, "PRODEX: END BLOCK MUST BE GREATER THAN CURRENT BLOCK");
+        require(_event.blockInit > block.number, "PRODEX: INIT BLOCK MUST BE GREATER THAN CURRENT BLOCK");
+        require(_event.blockEnd > block.number, "PRODEX: END BLOCK MUST BE GREATER THAN CURRENT BLOCK");
         require(_event.blockEnd >= _event.blockInit, "PRODEX: MATCH CANNOT END BEFORE MATCH INITIALIZATION");
         require(_event.betTeamA.length == 0, "PRODEX: MATCH CANNOT HAVE BETS ON INITIALIZATION");
         require(_event.betTeamB.length == 0, "PRODEX: MATCH CANNOT HAVE BETS ON INITIALIZATION");
@@ -123,7 +123,7 @@ contract Prodex is IProde, Ownable {
 
     function startEvent(uint256 eventId) external validMaxEvents(eventId) {
         require(
-            block.timestamp >= events[eventId].blockInit - events[eventId].thresholdInit,
+            block.number >= events[eventId].blockInit - events[eventId].thresholdInit,
             "PRODEX: CANNOT INIT EVENT YET"
         );
         events[eventId].active = true;
@@ -132,7 +132,7 @@ contract Prodex is IProde, Ownable {
     }
 
     function stopEventBetWindow(uint256 eventId) external validEvent(eventId) {
-        require(block.timestamp > events[eventId].blockInit, "PRODEX: BETS ARE STILL AVAILABLE");
+        require(block.number > events[eventId].blockInit, "PRODEX: BETS ARE STILL AVAILABLE");
         events[eventId].state = EventState.ORACLE;
         emit EventBetsFinished(eventId);
     }
@@ -140,7 +140,7 @@ contract Prodex is IProde, Ownable {
     function pokeOracle(uint256 eventId) external validEvent(eventId) {
         require(events[eventId].state == EventState.ORACLE, "PRODEX: EVENT STATE DOES NOT ALLOW TO POKE ORACLE");
         require(
-            block.timestamp > events[eventId].blockEnd + events[eventId].thresholdEnd,
+            block.number > events[eventId].blockEnd + events[eventId].thresholdEnd,
             "PRODEX: IT IS NOT TIME TO POKE ORACLE YET"
         );
         uint8 eventResult = IOracle(oracle).getEventResult(eventId);
@@ -178,7 +178,7 @@ contract Prodex is IProde, Ownable {
 
     function _placeBet(uint256 eventId, BetOdd bet) internal validEvent(eventId) {
         require(events[eventId].active, "PRODEX: EVENT NOT ACTIVE");
-        require(block.timestamp <= events[eventId].blockInit, "PRODEX: BET TIME EXPIRED");
+        require(block.number <= events[eventId].blockInit, "PRODEX: BET TIME EXPIRED");
         require(usersByEvent[msg.sender][eventId] == false, "PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT");
         usersByEvent[msg.sender][eventId] = true;
         events[eventId].poolSize += betAmount;

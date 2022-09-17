@@ -47,10 +47,9 @@ export const Networks: NetworksUserConfig = {
     },
     metistestnet:{
         chainId: 588,
+        live: true,
         url: 'https://stardust.metis.io/?owner=588',
         gasPrice: 10000000000,
-        accounts: {
-            mnemonic: process.env.HDWALLET_MNEMONIC || mnemonicLocal
-        }
+        accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
 }
