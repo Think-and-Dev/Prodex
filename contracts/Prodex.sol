@@ -72,44 +72,6 @@ contract Prodex is IProde, Ownable {
     _;
   }
 
-  event Initialized(
-    address token,
-    address NGO,
-    address oracle,
-    uint256 NGODonationPercentage,
-    uint256 maxEvents,
-    uint256 minWinnerPoints
-  );
-  event MinWinnerPointsUpdated(uint256 oldMinPoints, uint256 newMinPoints);
-  event EventCreated(uint256 eventId);
-  event EventActive(uint256 eventId, uint256 blockInit, uint256 blockEnd);
-  event BetPlaced(uint256 eventId, address indexed who, BetOdd bet, uint256 amount);
-  event EventBetsFinished(uint256 eventId);
-  event EventOutcome(uint256 eventId, uint8 result);
-  event UpdateWinnersEvent(uint256 eventId, uint256 amountOfWinners);
-  event ClaimPrize(address indexed who, address indexed to);
-  event PrizesSet(
-    uint256 ngoPrize,
-    uint256 winnerPrize,
-    uint256 totalAmountToShare,
-    uint256 winners
-  );
-  event ClaimNGO(uint256 ngoPrize);
-
-  struct Event {
-    bool active;
-    uint8 eventOutcome;
-    string name;
-    uint256 thresholdInit;
-    uint256 thresholdEnd;
-    uint256 blockInit;
-    uint256 blockEnd;
-    uint256 poolSize;
-    address[] betTeamA;
-    address[] betTeamB;
-    address[] betDraw;
-    EventState state;
-  }
 
   constructor(
     address _token,
