@@ -37,6 +37,7 @@ describe('Prodex', () => {
     prodex = await (
       await ethers.getContractFactory('Prodex')
     ).deploy(mockERC20.address, ngo.address, sportOracle.address, ngoDonationPercentage, maxEvents, minWinnerPoints)
+
     await prodex.deployed()
   })
 
@@ -48,7 +49,6 @@ describe('Prodex', () => {
 
   it('addEvent', async () => {
     const event = createDefaultEvent()
-
     await expect(prodex.addEvent(event)).to.emit(prodex, EVENTS.EventCreated).withArgs(1)
     await expect(prodex.addEvent(event)).to.emit(prodex, EVENTS.EventCreated).withArgs(2)
   })
