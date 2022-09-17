@@ -176,7 +176,7 @@ contract Prodex is IProde, Ownable {
         emit UpdateWinnersEvent(eventId, eventWinners.length);
     }
 
-    function placeBet(uint256 eventId, BetOdd bet) public validEvent(eventId) {
+    function _placeBet(uint256 eventId, BetOdd bet) internal validEvent(eventId) {
         require(events[eventId].active, "PRODEX: EVENT NOT ACTIVE");
         require(block.timestamp <= events[eventId].blockInit, "PRODEX: BET TIME EXPIRED");
         require(usersByEvent[msg.sender][eventId] == false, "PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT");
@@ -192,6 +192,16 @@ contract Prodex is IProde, Ownable {
         }
         IERC20(token).safeTransferFrom(msg.sender, address(this), betAmount);
         emit BetPlaced(eventId, msg.sender, bet);
+    }
+
+    function placeBet(uint256 eventId, BetOdd bet) external {
+        _placeBet(eventId, bet);
+    }
+
+    function placeBets(uint256[] memory betIds, BetOdd[] memory bets) external {
+        for (uint256 i = 0; i < betIds.length; i++) {
+            _placeBet(betIds[i], bets[i]);
+        }
     }
 
     function setPrizes() external {

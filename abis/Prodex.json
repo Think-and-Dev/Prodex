@@ -747,6 +747,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint256[]",
+        "name": "betIds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "enum IProde.BetOdd[]",
+        "name": "bets",
+        "type": "uint8[]"
+      }
+    ],
+    "name": "placeBets",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "eventId",
         "type": "uint256"
