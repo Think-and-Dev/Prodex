@@ -13,8 +13,8 @@ import "hardhat/console.sol";
 contract Prodex is IProde, Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
-
     using Counters for Counters.Counter;
+
     address public token;
     address public oracle;
     address public immutable NGO;
@@ -31,7 +31,7 @@ contract Prodex is IProde, Ownable {
     Counters.Counter private _eventIdProcessedCounter;
 
     mapping(address => uint256) public hitters;
-    mapping(address => uint256[]) public usersByEvent;
+    mapping(address => mapping(uint256 => bool)) public usersByEvent;
     mapping(uint256 => Event) public events;
 
     modifier validEvent(uint256 eventId) {
@@ -179,13 +179,8 @@ contract Prodex is IProde, Ownable {
     function placeBet(uint256 eventId, BetOdd bet) public validEvent(eventId) {
         require(events[eventId].active, "PRODEX: EVENT NOT ACTIVE");
         require(block.timestamp <= events[eventId].blockInit, "PRODEX: BET TIME EXPIRED");
-        //TODO: This require is reverting the transaction with error :0x32 (Array accessed at an out-of-bounds or negative index)
-        //TODO: I think we need to add the user to the mapping first. At the moment i will comment it
-        /* require(
-      usersByEvent[msg.sender][eventId] == 0,
-      'PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT'
-    );*/
-
+        require(usersByEvent[msg.sender][eventId] == false, "PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT");
+        usersByEvent[msg.sender][eventId] = true;
         events[eventId].poolSize += betAmount;
         globalPoolSize += betAmount;
         if (bet == BetOdd.TEAM_A) {
@@ -195,7 +190,6 @@ contract Prodex is IProde, Ownable {
         } else {
             events[eventId].betDraw.push(msg.sender);
         }
-
         IERC20(token).safeTransferFrom(msg.sender, address(this), betAmount);
         emit BetPlaced(eventId, msg.sender, bet);
     }
@@ -211,7 +205,6 @@ contract Prodex is IProde, Ownable {
         emit PrizesSet(ngoPrize, winnerPrize, usersTotalAmountToShare, winners);
     }
 
-    //TODO: why are we sending to address parameter, shouldn't be msg.sender?
     function claimPrize(address to) external ableToClaim {
         require(winnerPrize > 0, "PRODEX: WINERPRIZE NOT SET");
         require(hitters[msg.sender] >= minWinnerPoints, "PRODEX: USER NOT ELEGIBLE TO CLAIM PRIZE");

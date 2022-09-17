@@ -83,6 +83,23 @@ describe('Prodex', () => {
     await prodex.placeBet(expectedEventId, 1)
   })
 
+  it('Should not allow to place two bets for the same event',async()=>{
+    const startTime = getCurrentTimestamp() + 5 * MINUTES
+    const endTime = startTime + 45 * MINUTES
+    //TODO: remember in the front end to approve
+    await mockERC20.approve(prodex.address, ethers.constants.MaxUint256)
+    const event = createDefaultEvent({blockInit: startTime, blockEnd: endTime})
+    const expectedEventId = 1
+    await expect(prodex.addEvent(event)).to.emit(prodex, EVENTS.EventCreated).withArgs(expectedEventId)
+
+    await expect(prodex.startEvent(expectedEventId))
+      .to.emit(prodex, EVENTS.EventActive)
+      .withArgs(expectedEventId, event.blockInit, event.blockEnd)
+
+    await prodex.placeBet(expectedEventId, 1)
+    await expect(prodex.placeBet(expectedEventId, 1)).to.revertedWith("PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT");
+  })
+
   it('stopEventBetWindow', async () => {
     const startTime = getCurrentTimestamp() + 5 * MINUTES
     const endTime = startTime + 45 * MINUTES
@@ -122,7 +139,6 @@ describe('Prodex', () => {
       .to.emit(prodex, EVENTS.EventActive)
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
-    const amountToBet = 10
     const betType = BetOdd.DRAW
 
     await expect(prodex.placeBet(expectedEventId, betType))
