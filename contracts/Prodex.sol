@@ -50,6 +50,11 @@ contract Prodex is IProde, Ownable {
     _;
   }
 
+  modifier validMaxEvents(uint256 eventId) {
+    require(eventId <= maxEvents, 'EVENT IS GREATER THAN MAX EVENTS NUMBER');
+    _;
+  }
+
   modifier onlyOwnerOrNGO() {
     require(msg.sender == NGO || msg.sender == this.owner(), 'PRODEX: NOT NGO OR CONTRACT OWNER');
     _;
@@ -141,6 +146,7 @@ contract Prodex is IProde, Ownable {
   /********** INTERFACE ***********/
 
   function validateEventCreation(Event memory _event) internal view {
+
     require(
       _event.blockInit > block.timestamp,
       'PRODEX: INIT BLOCK MUST BE GREATER THAN CURRENT BLOCK'
@@ -160,7 +166,6 @@ contract Prodex is IProde, Ownable {
 
   function addEvent(Event memory _event) external onlyOwner returns (uint256) {
     uint256 currentEventId = _eventIdCounter.current();
-    console.log(currentEventId);
     require(currentEventId <= maxEvents, 'PRODEX: CANNOT ADD MORE EVENTS');
     _eventIdCounter.increment();
     uint256 newEventId = _eventIdCounter.current();
@@ -176,7 +181,7 @@ contract Prodex is IProde, Ownable {
   /**TODO SATURDAY */
   function addEvents(Event[] memory _events) external onlyOwner {}
 
-  function startEvent(uint256 eventId) external validEvent(eventId) {
+  function startEvent(uint256 eventId) external validMaxEvents(eventId) {
     require(
       block.timestamp >= events[eventId].blockInit - events[eventId].thresholdInit,
       'PRODEX: CANNOT INIT EVENT YET'
@@ -240,11 +245,14 @@ contract Prodex is IProde, Ownable {
   ) public validEvent(eventId) {
     require(events[eventId].active, 'PRODEX: EVENT NOT ACTIVE');
     require(block.timestamp <= events[eventId].blockInit, 'PRODEX: BET TIME EXPIRED');
-    require(
+    //TODO: it could bet better if this amount is a constant value
+    require(amount > 0, 'PRODEX: AMOUNT TO BET MUST BE GREATER THAN ZERO');
+    //TODO: This require is reverting the transaction with error :0x32 (Array accessed at an out-of-bounds or negative index)
+    //TODO: I think we need to add the user to the mapping first. At the moment i will comment it
+   /* require(
       usersByEvent[msg.sender][eventId] == 0,
       'PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT'
-    );
-    require(amount > 0, 'PRODEX: AMOUNT TO BET MUST BE GREATER THAN ZERO');
+    );*/
 
     events[eventId].poolSize += amount;
     globalPoolSize += amount;
@@ -255,6 +263,7 @@ contract Prodex is IProde, Ownable {
     } else {
       events[eventId].betDraw.push(msg.sender);
     }
+
     IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
     emit BetPlaced(eventId, msg.sender, bet, amount);
   }
