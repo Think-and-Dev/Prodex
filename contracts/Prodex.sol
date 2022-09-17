@@ -25,6 +25,7 @@ contract Prodex is IProde, Ownable {
     uint256 public winners;
     uint256 public winnerPrize;
     uint256 public ngoPrize;
+    uint256 public immutable betAmount;
 
     Counters.Counter private _eventIdCounter;
     Counters.Counter private _eventIdProcessedCounter;
@@ -59,20 +60,23 @@ contract Prodex is IProde, Ownable {
         address _oracle,
         uint256 _ngoDonationPercentage,
         uint256 _maxEvents,
-        uint256 _minWinnerPoints
+        uint256 _minWinnerPoints,
+        uint256 _betAmount
     ) {
         require(_token != address(0), "INVALID TOKEN ADDRESS");
         require(_ngo != address(0), "INVALID NGO ADDRESS");
         require(_oracle != address(0), "INVALID ORACLE ADDRESS");
         require(_minWinnerPoints > 0, "INVALID MIN WINNER POINTS");
+        require(_betAmount > 0, "INVALID BET AMOUNT");
 
-        maxEvents = _maxEvents;
-        minWinnerPoints = _minWinnerPoints;
         token = _token;
         NGO = _ngo;
-        NGODonationPercentage = _ngoDonationPercentage;
         oracle = _oracle;
-        emit Initialized(token, NGO, oracle, NGODonationPercentage, maxEvents, minWinnerPoints);
+        NGODonationPercentage = _ngoDonationPercentage;
+        maxEvents = _maxEvents;
+        minWinnerPoints = _minWinnerPoints;
+        betAmount = _betAmount;
+        emit Initialized(token, NGO, oracle, NGODonationPercentage, maxEvents, minWinnerPoints, betAmount);
     }
 
     /********** SETTERS ***********/
@@ -172,15 +176,9 @@ contract Prodex is IProde, Ownable {
         emit UpdateWinnersEvent(eventId, eventWinners.length);
     }
 
-    function placeBet(
-        uint256 eventId,
-        BetOdd bet,
-        uint256 amount
-    ) public validEvent(eventId) {
+    function placeBet(uint256 eventId, BetOdd bet) public validEvent(eventId) {
         require(events[eventId].active, "PRODEX: EVENT NOT ACTIVE");
         require(block.timestamp <= events[eventId].blockInit, "PRODEX: BET TIME EXPIRED");
-        //TODO: it could bet better if this amount is a constant value
-        require(amount > 0, "PRODEX: AMOUNT TO BET MUST BE GREATER THAN ZERO");
         //TODO: This require is reverting the transaction with error :0x32 (Array accessed at an out-of-bounds or negative index)
         //TODO: I think we need to add the user to the mapping first. At the moment i will comment it
         /* require(
@@ -188,8 +186,8 @@ contract Prodex is IProde, Ownable {
       'PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT'
     );*/
 
-        events[eventId].poolSize += amount;
-        globalPoolSize += amount;
+        events[eventId].poolSize += betAmount;
+        globalPoolSize += betAmount;
         if (bet == BetOdd.TEAM_A) {
             events[eventId].betTeamA.push(msg.sender);
         } else if (bet == BetOdd.TEAM_B) {
@@ -198,8 +196,8 @@ contract Prodex is IProde, Ownable {
             events[eventId].betDraw.push(msg.sender);
         }
 
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-        emit BetPlaced(eventId, msg.sender, bet, amount);
+        IERC20(token).safeTransferFrom(msg.sender, address(this), betAmount);
+        emit BetPlaced(eventId, msg.sender, bet);
     }
 
     function setPrizes() external {

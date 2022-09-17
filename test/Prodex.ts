@@ -33,10 +33,11 @@ describe('Prodex', () => {
     const ngoDonationPercentage = 15
     const maxEvents = 1
     const minWinnerPoints = 1
+    const betAmount = 1000
 
     prodex = await (
       await ethers.getContractFactory('Prodex')
-    ).deploy(mockERC20.address, ngo.address, sportOracle.address, ngoDonationPercentage, maxEvents, minWinnerPoints)
+    ).deploy(mockERC20.address, ngo.address, sportOracle.address, ngoDonationPercentage, maxEvents, minWinnerPoints,betAmount)
 
     await prodex.deployed()
   })
@@ -79,7 +80,7 @@ describe('Prodex', () => {
       .to.emit(prodex, EVENTS.EventActive)
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
-    await prodex.placeBet(expectedEventId, 1, 10)
+    await prodex.placeBet(expectedEventId, 1)
   })
 
   it('stopEventBetWindow', async () => {
@@ -95,12 +96,11 @@ describe('Prodex', () => {
       .to.emit(prodex, EVENTS.EventActive)
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
-    const amountToBet = 10
     const betType = BetOdd.DRAW
 
-    await expect(prodex.placeBet(expectedEventId, betType, amountToBet))
+    await expect(prodex.placeBet(expectedEventId, betType))
       .to.emit(prodex, EVENTS.BetPlaced)
-      .withArgs(expectedEventId, deployer.address, betType, amountToBet)
+      .withArgs(expectedEventId, deployer.address, betType)
 
     await AdvanceTimeForwardAndMine(50 * MINUTES)
 
@@ -125,9 +125,9 @@ describe('Prodex', () => {
     const amountToBet = 10
     const betType = BetOdd.DRAW
 
-    await expect(prodex.placeBet(expectedEventId, betType, amountToBet))
+    await expect(prodex.placeBet(expectedEventId, betType))
       .to.emit(prodex, EVENTS.BetPlaced)
-      .withArgs(expectedEventId, deployer.address, betType, amountToBet)
+      .withArgs(expectedEventId, deployer.address, betType)
 
     await AdvanceTimeForwardAndMine(50 * MINUTES)
 
@@ -153,12 +153,11 @@ describe('Prodex', () => {
       .to.emit(prodex, EVENTS.EventActive)
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
-    const amountToBet = 10
     const betType = BetOdd.DRAW
 
-    await expect(prodex.placeBet(expectedEventId, betType, amountToBet))
+    await expect(prodex.placeBet(expectedEventId, betType,))
       .to.emit(prodex, EVENTS.BetPlaced)
-      .withArgs(expectedEventId, deployer.address, betType, amountToBet)
+      .withArgs(expectedEventId, deployer.address, betType)
 
     await AdvanceTimeForwardAndMine(50 * MINUTES)
 
@@ -188,12 +187,11 @@ describe('Prodex', () => {
       .to.emit(prodex, EVENTS.EventActive)
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
-    const amountToBet = 10
     const betType = BetOdd.DRAW
 
-    await expect(prodex.placeBet(expectedEventId, betType, amountToBet))
+    await expect(prodex.placeBet(expectedEventId, betType))
       .to.emit(prodex, EVENTS.BetPlaced)
-      .withArgs(expectedEventId, deployer.address, betType, amountToBet)
+      .withArgs(expectedEventId, deployer.address, betType)
 
     await AdvanceTimeForwardAndMine(50 * MINUTES)
 
@@ -225,12 +223,11 @@ describe('Prodex', () => {
       .to.emit(prodex, EVENTS.EventActive)
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
-    const amountToBet = 10
     const betType = BetOdd.DRAW
 
-    await expect(prodex.placeBet(expectedEventId, betType, amountToBet))
+    await expect(prodex.placeBet(expectedEventId, betType))
       .to.emit(prodex, EVENTS.BetPlaced)
-      .withArgs(expectedEventId, deployer.address, betType, amountToBet)
+      .withArgs(expectedEventId, deployer.address, betType)
 
     await AdvanceTimeForwardAndMine(50 * MINUTES)
 
@@ -266,12 +263,11 @@ describe('Prodex', () => {
       .to.emit(prodex, EVENTS.EventActive)
       .withArgs(expectedEventId, event.blockInit, event.blockEnd)
 
-    const amountToBet = 10
     const betType = BetOdd.DRAW
 
-    await expect(prodex.placeBet(expectedEventId, betType, amountToBet))
+    await expect(prodex.placeBet(expectedEventId, betType))
       .to.emit(prodex, EVENTS.BetPlaced)
-      .withArgs(expectedEventId, deployer.address, betType, amountToBet)
+      .withArgs(expectedEventId, deployer.address, betType)
 
     await AdvanceTimeForwardAndMine(50 * MINUTES)
 

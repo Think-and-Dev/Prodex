@@ -17,6 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const ONG_ADDRESS = "0x58eFdc4236465a87c996eb12751151a6084181f9";
     const MIN_WINNER_POINTS = 10;
     const DONATION_PERCENTAJE = 100;
+    const BETAMOUNT = 1000;
 
     console.log('deployer', deployer)
 
@@ -28,7 +29,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         oracle.address,
         DONATION_PERCENTAJE,
         MAX_EVENTS,
-        MIN_WINNER_POINTS
+        MIN_WINNER_POINTS,
+        BETAMOUNT
     ]
 
     console.log('constructorArguments', constructorArguments)

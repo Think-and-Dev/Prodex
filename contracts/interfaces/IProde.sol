@@ -37,12 +37,13 @@ interface IProde {
         address oracle,
         uint256 NGODonationPercentage,
         uint256 maxEvents,
-        uint256 minWinnerPoints
+        uint256 minWinnerPoints,
+        uint256 betAmount
     );
     event MinWinnerPointsUpdated(uint256 oldMinPoints, uint256 newMinPoints);
     event EventCreated(uint256 eventId);
     event EventActive(uint256 eventId, uint256 blockInit, uint256 blockEnd);
-    event BetPlaced(uint256 eventId, address indexed who, BetOdd bet, uint256 amount);
+    event BetPlaced(uint256 eventId, address indexed who, BetOdd bet);
     event EventBetsFinished(uint256 eventId);
     event EventOutcome(uint256 eventId, uint8 result);
     event UpdateWinnersEvent(uint256 eventId, uint256 amountOfWinners);
@@ -74,11 +75,7 @@ interface IProde {
 
     function getEventWinners(uint256 eventId) external view returns (address[] memory);
 
-    function placeBet(
-        uint256 eventId,
-        BetOdd bet,
-        uint256 amount
-    ) external;
+    function placeBet(uint256 eventId, BetOdd bet) external;
 
     function setPrizes() external;
 
