@@ -19,6 +19,7 @@ contract ProdeNFT is ERC721URIStorage, Ownable {
 
     event Initialized(string tokenUri, string name, string symbol);
     event ContractURIUpdated(string indexed contractUri);
+    event PrizeMinted(uint256 eventId, address winner);
 
     mapping(uint256 => mapping(address => bool)) mints;
 
@@ -51,6 +52,8 @@ contract ProdeNFT is ERC721URIStorage, Ownable {
         _safeMint(msg.sender, newTokenId);
 
         mints[_eventId][msg.sender] = true;
+
+        emit PrizeMinted(_eventId, msg.sender);
         return newTokenId;
     }
 
