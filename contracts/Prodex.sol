@@ -1,22 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-/**
- * STRUCTS DEFINED
-mapping(address => uint256) hitters;
-Uint256 minWinnerPoints = 20
-Uint256 winners;
-mapping(uint256 =>SportEvent) eventos; 
-Uint256 lastEventProcessd = 1 ; 
-Uint256 lastIndexAddressWinnerProcessed = 20; 
-mapping(uint256 =>SportEvent) eventos; 
-
-/**
-WE NEED IT TO CHECK THAT THE USER HAS NOT PLACED A BET ON THE MATCH BEFORE
-
-mapping(address => uint256[]) users;
-*/
-
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
@@ -86,30 +70,47 @@ contract Prodex is IProde, Ownable {
     require(_oracle != address(0), 'INVALID ORACLE ADDRESS');
     require(_minWinnerPoints > 0, 'INVALID MIN WINNER POINTS');
 
-    maxEvents = _maxEvents;
-    minWinnerPoints = _minWinnerPoints;
-    token = _token;
-    NGO = _ngo;
-    NGODonationPercentage = _ngoDonationPercentage;
-    oracle = _oracle;
-    emit Initialized(token, NGO, oracle, NGODonationPercentage, maxEvents, minWinnerPoints);
-  }
+    modifier onlyOwnerOrNGO() {
+        require(msg.sender == NGO || msg.sender == this.owner(), "PRODEX: NOT NGO OR CONTRACT OWNER");
+        _;
+    }
 
-  /********** SETTERS ***********/
-  function setMinWinnerPoints(uint256 _newMinWinnerPoints) external onlyOwner {
-    require(_newMinWinnerPoints > 0, 'INVALID MIN WINNER POINTS');
-    uint256 oldMinnerPoints = _newMinWinnerPoints;
-    minWinnerPoints = _newMinWinnerPoints;
-    emit MinWinnerPointsUpdated(oldMinnerPoints, minWinnerPoints);
-  }
+    modifier ableToClaim() {
+        require(_eventIdProcessedCounter.current() == maxEvents, "PRODEX: ALL EVENTS MUST BE PROCESSED TO CLAIM PRIZE");
+        _;
+    }
 
-  /********** GETTERS ***********/
+    constructor(
+        address _token,
+        address _ngo,
+        address _oracle,
+        uint256 _ngoDonationPercentage,
+        uint256 _maxEvents,
+        uint256 _minWinnerPoints
+    ) {
+        require(_token != address(0), "INVALID TOKEN ADDRESS");
+        require(_ngo != address(0), "INVALID NGO ADDRESS");
+        require(_oracle != address(0), "INVALID ORACLE ADDRESS");
+        require(_minWinnerPoints > 0, "INVALID MIN WINNER POINTS");
 
-  function getNGOCurrentPoolPrize() external view returns (uint256) {
-    return globalPoolSize * (NGODonationPercentage / 100);
-  }
+        maxEvents = _maxEvents;
+        minWinnerPoints = _minWinnerPoints;
+        token = _token;
+        NGO = _ngo;
+        NGODonationPercentage = _ngoDonationPercentage;
+        oracle = _oracle;
+        emit Initialized(token, NGO, oracle, NGODonationPercentage, maxEvents, minWinnerPoints);
+    }
 
-  /********** INTERFACE ***********/
+    /********** SETTERS ***********/
+    function setMinWinnerPoints(uint256 _newMinWinnerPoints) external onlyOwner {
+        require(_newMinWinnerPoints > 0, "INVALID MIN WINNER POINTS");
+        uint256 oldMinnerPoints = _newMinWinnerPoints;
+        minWinnerPoints = _newMinWinnerPoints;
+        emit MinWinnerPointsUpdated(oldMinnerPoints, minWinnerPoints);
+    }
+
+    /********** GETTERS ***********/
 
   function validateEventCreation(Event memory _event) internal view {
 
@@ -144,8 +145,14 @@ contract Prodex is IProde, Ownable {
     return newEventId;
   }
 
-  /**TODO SATURDAY */
-  function addEvents(Event[] memory _events) external onlyOwner {}
+    function validateEventCreation(Event memory _event) internal view {
+        require(_event.blockInit > block.timestamp, "PRODEX: INIT BLOCK MUST BE GREATER THAN CURRENT BLOCK");
+        require(_event.blockEnd > block.timestamp, "PRODEX: END BLOCK MUST BE GREATER THAN CURRENT BLOCK");
+        require(_event.blockEnd >= _event.blockInit, "PRODEX: MATCH CANNOT END BEFORE MATCH INITIALIZATION");
+        require(_event.betTeamA.length == 0, "PRODEX: MATCH CANNOT HAVE BETS ON INITIALIZATION");
+        require(_event.betTeamB.length == 0, "PRODEX: MATCH CANNOT HAVE BETS ON INITIALIZATION");
+        require(_event.betDraw.length == 0, "PRODEX: MATCH CANNOT HAVE BETS ON INITIALIZATION");
+    }
 
   function startEvent(uint256 eventId) external validMaxEvents(eventId) {
     require(
@@ -157,11 +164,18 @@ contract Prodex is IProde, Ownable {
     emit EventActive(eventId, events[eventId].blockInit, events[eventId].blockEnd);
   }
 
-  function stopEventBetWindow(uint256 eventId) external validEvent(eventId) {
-    require(block.timestamp > events[eventId].blockInit, 'PRODEX: BETS ARE STILL AVAILABLE');
-    events[eventId].state = EventState.ORACLE;
-    emit EventBetsFinished(eventId);
-  }
+    /**TODO SATURDAY */
+    function addEvents(Event[] memory _events) external onlyOwner {}
+
+    function startEvent(uint256 eventId) external validEvent(eventId) {
+        require(
+            block.timestamp >= events[eventId].blockInit - events[eventId].thresholdInit,
+            "PRODEX: CANNOT INIT EVENT YET"
+        );
+        events[eventId].active = true;
+        events[eventId].state = EventState.ACTIVE;
+        emit EventActive(eventId, events[eventId].blockInit, events[eventId].blockEnd);
+    }
 
   function pokeOracle(uint256 eventId) external validEvent(eventId) {
     require(
@@ -179,31 +193,28 @@ contract Prodex is IProde, Ownable {
     emit EventOutcome(eventId, eventResult);
   }
 
-  function getEventWinners(uint256 eventId) public view returns (address[] memory) {
-    uint256 result = events[eventId].eventOutcome;
-    if (result == 0) {
-      return events[eventId].betTeamA;
-    } else if (result == 1) {
-      return events[eventId].betTeamB;
-    } else {
-      return events[eventId].betDraw;
+    function pokeOracle(uint256 eventId) external validEvent(eventId) {
+        require(events[eventId].state == EventState.ORACLE, "PRODEX: EVENT STATE DOES NOT ALLOW TO POKE ORACLE");
+        require(
+            block.timestamp > events[eventId].blockEnd + events[eventId].thresholdEnd,
+            "PRODEX: IT IS NOT TIME TO POKE ORACLE YET"
+        );
+        uint8 eventResult = IOracle(oracle).getEventResult(eventId);
+        events[eventId].eventOutcome = eventResult;
+        events[eventId].state = EventState.UPDATING;
+        emit EventOutcome(eventId, eventResult);
     }
-  }
 
-  function updateResults(uint256 eventId) external validEvent(eventId) {
-    require(events[eventId].state == EventState.UPDATING);
-    address[] memory eventWinners = getEventWinners(eventId);
-    for (uint256 i = 0; i < eventWinners.length; i++) {
-      hitters[eventWinners[i]] += 1;
-      if (hitters[eventWinners[i]] >= minWinnerPoints) {
-        winners++;
-      }
+    function getEventWinners(uint256 eventId) public view returns (address[] memory) {
+        uint256 result = events[eventId].eventOutcome;
+        if (result == 0) {
+            return events[eventId].betTeamA;
+        } else if (result == 1) {
+            return events[eventId].betTeamB;
+        } else {
+            return events[eventId].betDraw;
+        }
     }
-    events[eventId].state = EventState.FINISHED;
-    events[eventId].active = false;
-    _eventIdProcessedCounter.increment();
-    emit UpdateWinnersEvent(eventId, eventWinners.length);
-  }
 
   function placeBet(
     uint256 eventId,
@@ -221,14 +232,27 @@ contract Prodex is IProde, Ownable {
       'PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT'
     );*/
 
-    events[eventId].poolSize += amount;
-    globalPoolSize += amount;
-    if (bet == BetOdd.TEAM_A) {
-      events[eventId].betTeamA.push(msg.sender);
-    } else if (bet == BetOdd.TEAM_B) {
-      events[eventId].betTeamB.push(msg.sender);
-    } else {
-      events[eventId].betDraw.push(msg.sender);
+    function placeBet(
+        uint256 eventId,
+        BetOdd bet,
+        uint256 amount
+    ) external validEvent(eventId) {
+        require(events[eventId].active, "PRODEX: EVENT NOT ACTIVE");
+        require(block.timestamp <= events[eventId].blockInit, "PRODEX: BET TIME EXPIRED");
+        require(usersByEvent[msg.sender][eventId] == 0, "PRODEX: USER CANNOT BET MORE THAN ONCE PER EVENT");
+        require(amount > 0, "PRODEX: AMOUNT TO BET MUST BE GREATER THAN ZERO");
+
+        events[eventId].poolSize += amount;
+        globalPoolSize += amount;
+        if (bet == BetOdd.TEAM_A) {
+            events[eventId].betTeamA.push(msg.sender);
+        } else if (bet == BetOdd.TEAM_B) {
+            events[eventId].betTeamB.push(msg.sender);
+        } else {
+            events[eventId].betDraw.push(msg.sender);
+        }
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+        emit BetPlaced(eventId, msg.sender, bet, amount);
     }
 
     IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
@@ -258,16 +282,16 @@ contract Prodex is IProde, Ownable {
     emit ClaimPrize(msg.sender, to);
   }
 
-  function claimONG() external onlyOwnerOrNGO ableToClaim {
-    IERC20(token).safeTransfer(NGO, ngoPrize);
-    emit ClaimNGO(ngoPrize);
-  }
-
-  function isWinner(address user) external view returns (bool) {
-    require(user != address(0), 'PRODEX: INVALID ADDRESS');
-    if (hitters[user] >= minWinnerPoints) {
-      return true;
+    function claimONG() external onlyOwnerOrNGO ableToClaim {
+        IERC20(token).safeTransfer(NGO, ngoPrize);
+        emit ClaimNGO(ngoPrize);
     }
-    return false;
-  }
+
+    function isWinner(address user) external view returns (bool) {
+        require(user != address(0), "PRODEX: INVALID ADDRESS");
+        if (hitters[user] >= minWinnerPoints) {
+            return true;
+        }
+        return false;
+    }
 }

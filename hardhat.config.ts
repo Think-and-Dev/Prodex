@@ -10,7 +10,6 @@ import 'hardhat-abi-exporter';
 import 'hardhat-contract-sizer';
 
 const config: HardhatUserConfig = {
-  defaultNetwork: 'hardhat',
   networks: Networks,
   namedAccounts: NamedAccounts,
   etherscan: {

@@ -9,7 +9,7 @@
     "start": "echo 'Starting node for local testing....\n'; rm -rf deployments/localhost_31337; DISABLE_HARNESS=true hardhat node",
     "console": "hardhat console --network",
     "compile": "npx hardhat compile",
-    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true npx hardhat test",
+    "test": "npx hardhat test",
     "size-contracts": "hardhat size-contracts",
     "coverage": "yarn clean && HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true node --max-old-space-size=4096 ./node_modules/.bin/hardhat coverage --network coverage --temp build",
     "docgen": "hardhat docgen",
@@ -52,11 +52,9 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@chainlink/contracts": "^0.4.1",
     "@openzeppelin/contracts": "^4.7.3",
     "@pooltogether/owner-manager-contracts": "^1.1.0",
     "chai-ethers": "^0.0.1",
-    "@openzeppelin/contracts-upgradeable": "^4.7.3",
     "typescript-eslint": "^0.0.1-alpha.0"
   }
 }

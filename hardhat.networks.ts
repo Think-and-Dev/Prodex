@@ -11,10 +11,16 @@ try {
 }
 
 export const Networks: NetworksUserConfig = {
-    hardhat: {
-        blockGasLimit: 6800000,
+    localhost: {
+        chainId: 1337,
+        url: 'http://127.0.0.1:8545',
         allowUnlimitedContractSize: true,
-        chainId: 31337
+        timeout: 1000 * 60
+    },
+    goerli: {
+        chainId: 5,
+        url:  'https://goerli.infura.io/v3/1688cddf85744993a910099e8aa19261',
+        accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
     ganache: {
         url: 'http://127.0.0.1:8545',
