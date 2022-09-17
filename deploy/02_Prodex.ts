@@ -8,26 +8,26 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = parseInt(await getChainId(), 10)
   const {deployer} = await getNamedAccounts()
 
-  const oracle = await deployments.get('Oracle')
+  //const oracle = await deployments.get('Oracle')
 
-  const MockToken = await ethers.getContractFactory('MockToken')
-  const mockToken = await MockToken.deploy('TYD', 'TYD', 5000)
-  await mockToken.deployed()
+  // const MockToken = await ethers.getContractFactory('MockToken')
+  // const mockToken = await MockToken.deploy('TYD', 'TYD', 5000)
+  // await mockToken.deployed()
 
-  const MAX_EVENTS = 100
+  const MAX_EVENTS = 1
   const ONG_ADDRESS = '0x58eFdc4236465a87c996eb12751151a6084181f9'
   const MIN_WINNER_POINTS = 10
   const DONATION_PERCENTAJE = 100
-  const BETAMOUNT = 1000
+  const BETAMOUNT = '1000000000000000000'
 
   console.log('deployer', deployer)
 
   console.log(`\n Deploying Prodex...on chain ${chainId}`)
 
   let constructorArguments = [
-    mockToken.address,
+    '0x620183085B03064BE38529Df28Bf52ccF251f084',
     ONG_ADDRESS,
-    oracle.address,
+    '0x2e77379d26b40e70bae0EAB873E333cB79f28036',
     DONATION_PERCENTAJE,
     MAX_EVENTS,
     MIN_WINNER_POINTS,
