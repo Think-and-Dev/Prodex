@@ -20,12 +20,16 @@ mapping(address => uint256[]) users;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import './interfaces/IProde.sol';
 import './interfaces/IOracle.sol';
 import 'hardhat/console.sol';
 
 contract Prodex is IProde, Ownable {
   using SafeERC20 for IERC20;
+  using SafeMath for uint256;
+
   using Counters for Counters.Counter;
   address public token;
   address public oracle;
@@ -207,6 +211,7 @@ contract Prodex is IProde, Ownable {
       'PRODEX: IT IS NOT TIME TO POKE ORACLE YET'
     );
     uint8 eventResult = IOracle(oracle).getEventResult(eventId);
+
     events[eventId].eventOutcome = eventResult;
     events[eventId].state = EventState.UPDATING;
     emit EventOutcome(eventId, eventResult);
@@ -274,12 +279,15 @@ contract Prodex is IProde, Ownable {
       'PRODEX: ALL EVENTS MUST BE PROCESSED TO SET PRIZES'
     );
     require(winners > 0, 'PRODEX: NO WINNERS');
-    uint256 usersTotalAmountToShare = globalPoolSize * ((100 - NGODonationPercentage) / 100);
+    uint256 percentage = 100 - NGODonationPercentage;
+    uint256 usersTotalAmountToShare = globalPoolSize.mul(percentage).div(100);
+
     winnerPrize = usersTotalAmountToShare / winners;
     ngoPrize = globalPoolSize - usersTotalAmountToShare;
     emit PrizesSet(ngoPrize, winnerPrize, usersTotalAmountToShare, winners);
   }
 
+  //TODO: why are we sending to address parameter, shouldn't be msg.sender?
   function claimPrize(address to) external ableToClaim {
     require(winnerPrize > 0, 'PRODEX: WINERPRIZE NOT SET');
     require(hitters[msg.sender] >= minWinnerPoints, 'PRODEX: USER NOT ELEGIBLE TO CLAIM PRIZE');

@@ -28,3 +28,30 @@ export const AdvanceTimeForwardAndMine = async (time: number) => {
 export const MINUTES = 60
 export const HOURS = 60 * MINUTES
 export const DAYS = 24 * HOURS
+
+export enum EVENTS {
+  MinWinnerPointsUpdated = 'MinWinnerPointsUpdated',
+  EventCreated = 'EventCreated',
+  EventActive = 'EventActive',
+  BetPlaced = 'BetPlaced',
+  EventBetsFinished = 'EventBetsFinished',
+  EventOutcome = 'EventOutcome',
+  UpdateWinnersEvent = 'UpdateWinnersEvent',
+  ClaimPrize = 'ClaimPrize',
+  PrizesSet = 'PrizesSet',
+  ClaimNGO = 'ClaimNGO'
+}
+
+export enum EventState {
+  CREATED,
+  ACTIVE,
+  ORACLE,
+  UPDATING,
+  FINISHED
+}
+
+export enum BetOdd {
+  TEAM_A,
+  DRAW,
+  TEAM_B
+}
