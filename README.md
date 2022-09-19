@@ -22,7 +22,6 @@ ProdeNFT: https://stardust-explorer.metis.io/address/0x07D99c69CcB9f03C539F3B732
 
 ## Demo App
 
-Para mas informacion, podes ver la implementacion de la app a traves del siguiente link
 For more information you can interact with the Dapp implementation through this link : [https://prode-ui.vercel.app/](https://prode-ui.vercel.app/)
 
 ## Youtube demo App
