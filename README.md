@@ -12,7 +12,9 @@
 
 ### Stardust deployed contracts addresses  
 Prodex: https://stardust-explorer.metis.io/address/0x9e77Ec5425D19F5DD49DD4C21357Bb0ffFb41218/transactions
+
 Oracle: https://stardust-explorer.metis.io/address/0x2e77379d26b40e70bae0EAB873E333cB79f28036/transactions
+
 ProdeNFT: https://stardust-explorer.metis.io/address/0x07D99c69CcB9f03C539F3B7322004c7176E07B3E/transactions
 
 
