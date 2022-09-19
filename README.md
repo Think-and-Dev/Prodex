@@ -11,6 +11,7 @@
 * [Chainlink](https://chain.link/)
 
 ### Stardust deployed contracts addresses  
+
 Prodex: https://stardust-explorer.metis.io/address/0x9e77Ec5425D19F5DD49DD4C21357Bb0ffFb41218/transactions
 
 Oracle: https://stardust-explorer.metis.io/address/0x2e77379d26b40e70bae0EAB873E333cB79f28036/transactions
@@ -21,7 +22,8 @@ ProdeNFT: https://stardust-explorer.metis.io/address/0x07D99c69CcB9f03C539F3B732
 
 ## Demo App
 
-Para mas informacion, podes ver la implementacion de la app a traves del siguiente link: [https://prode-ui.vercel.app/](https://prode-ui.vercel.app/)
+Para mas informacion, podes ver la implementacion de la app a traves del siguiente link
+For more information you can interact with the Dapp implementation through this link : [https://prode-ui.vercel.app/](https://prode-ui.vercel.app/)
 
 ## Youtube demo App
 https://youtu.be/dcCl_bHmPIc
